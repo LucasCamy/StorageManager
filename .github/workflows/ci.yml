@@ -1,0 +1,58 @@
+name: Build and integration
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: storagemanager_test
+          POSTGRES_USER: storage_test
+          POSTGRES_PASSWORD: ci-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U storage_test -d storagemanager_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=127.0.0.1;Port=5432;Database=storagemanager_test;Username=storage_test;Password=ci-test-only
+      Setup__Token: ci-ephemeral-setup-token-only-2026
+      TEST_SETUP_TOKEN: ci-ephemeral-setup-token-only-2026
+      API_BASE_URL: http://127.0.0.1:5081
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - name: Build API
+        run: dotnet build src/backend/StorageManager.Api --configuration Release
+      - name: Apply schema
+        run: dotnet src/backend/StorageManager.Api/bin/Release/net10.0/StorageManager.Api.dll --migrate
+      - name: Build frontend
+        working-directory: src/frontend
+        run: npm ci && npm run build
+      - name: Integration tests against PostgreSQL
+        shell: bash
+        run: |
+          dotnet src/backend/StorageManager.Api/bin/Release/net10.0/StorageManager.Api.dll --urls http://127.0.0.1:5081 > /tmp/storagemanager-api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid"' EXIT
+          for attempt in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:5081/health > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/test-integration.mjs
+      - name: API log on failure
+        if: failure()
+        run: test ! -f /tmp/storagemanager-api.log || tail -100 /tmp/storagemanager-api.log

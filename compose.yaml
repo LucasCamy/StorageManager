@@ -1,0 +1,22 @@
+name: storagemanager
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: storagemanager
+      POSTGRES_USER: storagemanager
+      POSTGRES_PASSWORD: ${STORAGE_DB_PASSWORD:?Run scripts/Start-Dev.ps1 to generate development credentials}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storagemanager -d storagemanager"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres_data:

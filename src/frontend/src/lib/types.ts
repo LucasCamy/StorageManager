@@ -1,0 +1,12 @@
+export type Role = 'Admin' | 'Operator' | 'Viewer'
+export type User = { id: string; name: string; email: string; role: Role; organizationId: string; organizationName: string }
+export type Member = { id: string; name: string; email: string; role: Role; isActive: boolean }
+export type Location = { id: string; name: string; code: string; type: string; parentId: string | null; path: string; canStore: boolean }
+export type ProductKind = 'Consumable' | 'Returnable'
+export type Product = { id: string; code: string; name: string; category: string; unit: string; kind: ProductKind; minimumStock: string; quantityScale: number; isActive: boolean }
+export type Stock = { productId: string; productCode: string; productName: string; category: string; unit: string; kind: ProductKind; locationId: string; locationPath: string; quantity: string; reserved: string; available: string; minimumStock: string; status: 'Healthy' | 'Low' | 'Empty' }
+export type MovementType = 'Receipt' | 'Consumption'
+export type Movement = { id: string; number: string; type: MovementType; productId: string; productCode: string; productName: string; locationId: string; locationPath: string; quantity: string; unit: string; reference: string; notes: string; recipient: string; actorName: string; createdAt: string }
+export type MovementInput = { type: MovementType; productId: string; locationId: string; quantity: string; reference: string; notes: string; recipient: string }
+export type Page<T> = { items: T[]; total: number; page: number; pageSize: number }
+export type Dashboard = { productCount: number; locationCount: number; stockedPositionCount: number; lowStockCount: number; todayMovementCount: number; recentMovements: Movement[]; lowStockItems: Stock[] }

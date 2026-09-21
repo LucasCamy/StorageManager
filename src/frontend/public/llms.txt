@@ -1,0 +1,5 @@
+# StorageManager
+
+Aplicação privada de controle de estoque. O conteúdo exige autenticação e não deve ser indexado.
+
+- [Página inicial](/)

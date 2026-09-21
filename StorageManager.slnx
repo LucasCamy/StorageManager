@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/backend/">
+    <Project Path="src/backend/StorageManager.Api/StorageManager.Api.csproj" />
+    <Project Path="src/backend/StorageManager.Core/StorageManager.Core.csproj" />
+    <Project Path="src/backend/StorageManager.Infrastructure/StorageManager.Infrastructure.csproj" />
+  </Folder>
+</Solution>
