@@ -1,8 +1,9 @@
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Activity, Boxes, Building2, LayoutDashboard, LogOut, Menu, PackageSearch, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '@/auth'
 import { AuthPage } from '@/pages/auth-page'
+import { LandingPage } from '@/pages/landing-page'
 import { DashboardPage, LocationsPage, MovementsPage, ProductsPage, StockPage, UsersPage } from '@/pages/app-pages'
 import { ErrorNotice, Loading } from '@/components/common'
 import { Button } from '@/components/ui/button'
@@ -17,10 +18,13 @@ const navigation = [
 
 export function App() {
   const auth = useAuth()
+  const location = useLocation()
   const [menu, setMenu] = useState(false)
+  if (location.pathname === '/') return <LandingPage signedIn={Boolean(auth.user)} />
   if (auth.loading) return <Loading label="Verificando sua sessão…" />
-  if (auth.error) return <div className="mx-auto max-w-xl p-8"><ErrorNotice error={auth.error} retry={() => void auth.refresh()} /></div>
-  if (!auth.user) return <AuthPage />
+  if (auth.error) return <div className="mx-auto max-w-xl p-8"><ErrorNotice error={auth.error} retry={() => void auth.refresh()} /><Link to="/" className="mt-5 inline-block text-sm font-semibold text-primary hover:underline">Voltar ao início</Link></div>
+  if (!auth.user) return location.pathname === '/login' ? <AuthPage /> : <Navigate to="/login" replace />
+  if (location.pathname === '/login') return <Navigate to="/dashboard" replace />
   const links = auth.user.role === 'Admin' ? [...navigation, { to: '/users', label: 'Usuários', icon: Users }] : navigation
   return <div className="min-h-svh bg-background lg:grid lg:grid-cols-[248px_1fr]">
     {menu && <button aria-label="Fechar menu" className="fixed inset-0 z-40 bg-slate-950/35 lg:hidden" onClick={() => setMenu(false)} />}

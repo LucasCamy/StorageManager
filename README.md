@@ -4,6 +4,7 @@ Sistema web de estoque para consumíveis e itens retornáveis, preparado para fu
 
 ## O que já funciona
 
+- landing page pública em `/`, com prévia interativa demonstrativa; login e configuração inicial em `/login`;
 - instalação inicial segura, login por cookie e proteção CSRF;
 - perfis Administrador, Operador e Consulta, com suspensão imediata de sessão;
 - locais físicos hierárquicos, como sala, armário, prateleira e gaveta;
